@@ -14,6 +14,7 @@
 
 using namespace std;
 
+const int GRAFOS = 15;             // número de grafos de entrada
 const int REPETICOES = 10;         // medidas de cada método em cada grafo
 const double TEMPO_MINIMO = 0.1;   // cada medida dura pelo menos 0,1 segundo
 
@@ -43,7 +44,7 @@ double medir(int metodo, const Grafo& g, Matriz& resultado, int& execucoes) {
 }
 
 int main() {
-    int tamanhos[15] = {10, 25, 50, 75, 100, 150, 200, 250, 300, 400, 500, 650, 800, 1000, 1500};
+    int tamanhos[GRAFOS] = {10, 25, 50, 75, 100, 150, 200, 250, 300, 400, 500, 650, 800, 1000, 1500};
 
     ofstream tempos("resultados/tempos.csv");
     ofstream validacao("resultados/validacao.csv");
@@ -59,7 +60,7 @@ int main() {
     cout << "n\tFW (s)\t\tDijkstra (s)\tDij/FW\t\tdistâncias" << endl;
     bool tudoIgual = true;
 
-    for (int t = 0; t < 15; t++) {
+    for (int t = 0; t < GRAFOS; t++) {
         int n = tamanhos[t];
         Grafo g = lerGrafo("dados/Entrada " + to_string(n) + ".txt");
 
@@ -107,7 +108,7 @@ int main() {
                       << "," << c[m].comparacoesHeap << "," << c[m].descartes << "," << c[m].atualizacoes << "\n";
         }
 
-        // grava os resultados deste grafo já agora (se o programa for interrompido, eles ficam salvos)
+        // grava agora os resultados deste grafo (se o programa for interrompido, eles ficam salvos)
         tempos.flush();
         validacao.flush();
         contagens.flush();

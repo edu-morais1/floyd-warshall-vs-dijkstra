@@ -15,7 +15,7 @@ typedef vector<int> Matriz;
 
 struct Grafo {
     int n;              // número de vértices
-    vector<int> peso;   // matriz de pesos (0 = sem aresta)
+    Matriz peso;        // matriz de pesos (0 = sem aresta)
     int arestas;        // número de arestas
 };
 

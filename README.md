@@ -18,7 +18,7 @@ número de vértices na primeira linha e depois a matriz de pesos (0 = sem arest
 
 ```
 make testes      # compila e roda os testes
-make rodar       # roda o experimento (uns 8 minutos) e grava os CSVs em resultados/
+make rodar       # roda o experimento (uns 5 minutos) e grava os CSVs em resultados/
 make graficos    # gera as figuras em resultados/figuras/
 ```
 

@@ -87,6 +87,8 @@ int main() {
     dijkstraTodosOsParesContando(e10, c);
     confere(c.relaxamentos == 560, "Entrada 10: 10 * 56 relaxamentos");
     confere(c.descartes == 10 + c.atualizacoes, "Entrada 10: uma remoção para cada inserção");
+    // valores obtidos com a fila de prioridade da biblioteca padrão do g++
+    confere(c.comparacoesHeap == 464 && c.atualizacoes == 127, "Entrada 10: 464 comparações na fila e 127 atualizações");
 
     // 3. Grafos sorteados: os quatro resultados têm de ser iguais
     srand(2026);
