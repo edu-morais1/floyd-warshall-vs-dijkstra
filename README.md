@@ -21,7 +21,7 @@ número de vértices na primeira linha e depois a matriz de pesos (0 = sem arest
 
 ```
 make testes      # compila e roda os testes
-make rodar       # roda o experimento (uns 8 minutos) e grava os CSVs em resultados/
+make rodar       # roda o experimento (de 4 a 8 minutos, conforme a máquina) e grava os CSVs em resultados/
 make graficos    # gera as figuras em resultados/figuras/
 ```
 
@@ -37,7 +37,7 @@ comandos do Linux. Há três caminhos:
 3. **Sem o `make`**, no PowerShell, de dentro desta pasta:
 
    ```
-   mkdir build, resultados
+   mkdir build
    g++ -std=c++17 -O2 -Wall src/testes.cpp src/grafo.cpp src/floyd_warshall.cpp src/dijkstra.cpp src/contagem.cpp -o build/testes.exe
    .\build\testes.exe
    g++ -std=c++17 -O2 -Wall src/experimento.cpp src/grafo.cpp src/floyd_warshall.cpp src/dijkstra.cpp src/contagem.cpp -o build/experimento.exe
@@ -46,8 +46,8 @@ comandos do Linux. Há três caminhos:
    python scripts/graficos.py
    ```
 
-   A pasta `resultados` precisa existir antes de rodar o experimento; o `mkdir`
-   acima já a cria.
+   O experimento grava os CSVs na pasta `resultados`, que já vem no repositório.
+   Se ela tiver sido apagada, crie-a de novo com `mkdir resultados`.
 
 Observações:
 

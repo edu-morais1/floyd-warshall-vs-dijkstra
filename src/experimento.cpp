@@ -66,8 +66,8 @@ int main() {
     bool tudoIgual = true;
 
     for (int t = 0; t < GRAFOS; t++) {
-        int n = tamanhos[t];
-        Grafo g = lerGrafo("dados/Entrada " + to_string(n) + ".txt");
+        Grafo g = lerGrafo("dados/Entrada " + to_string(tamanhos[t]) + ".txt");
+        int n = g.n;   // o n do próprio arquivo, que é o tamanho real das matrizes
 
         // aquecimento: uma execução de cada método antes de medir
         for (int m = 0; m < METODOS; m++)

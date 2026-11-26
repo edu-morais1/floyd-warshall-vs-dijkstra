@@ -12,7 +12,8 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 
 PASTA = "resultados"
-# caches do processador onde a rodada foi feita (Ryzen 7 5700X: L2 de 512 KiB por núcleo, L3 de 32 MiB)
+# caches do processador onde a rodada foi feita (Ryzen 7 5700X: L2 de 512 KiB por núcleo, L3 de 32 MiB);
+# numa rodada em outra máquina, troque pelos valores dela
 CACHE_L2 = 512 * 1024
 CACHE_L3 = 32 * 1024 * 1024
 FIGURAS = os.path.join(PASTA, "figuras")
@@ -147,18 +148,27 @@ salvar("tempo_loglog")
 # 3: razão entre o tempo de cada Dijkstra e o do Floyd-Warshall
 # (acima de 1, o Floyd-Warshall é mais rápido)
 plt.figure()
+maior_razao = 0
 for alg in ["dijkstra_v_vezes", "dijkstra_vetor"]:
     razao = [media[alg][i] / media["floyd_warshall"][i] for i in range(len(ns))]
     plt.plot(ns, razao, marker=MARCADORES[alg], color=CORES[alg], label=NOMES[alg])
     rotulo(ultimo, razao[-1], com_virgula(razao[-1], 2))
+    maior_razao = max(maior_razao, max(razao))
 plt.axhline(1, color=CINZA, linewidth=1.2)
 plt.text(9, 1.15, "1 = mesmo tempo do Floyd-Warshall", fontsize=9, color=TEXTO)
-# onde o heap passa a ganhar do vetor
-i = ns.index(500)
-plt.annotate("a partir de n = 500, o heap\nfica mais rápido que o vetor", (500, media["dijkstra_v_vezes"][i] / media["floyd_warshall"][i]),
-             xytext=(230, 4.6), fontsize=9, color=TEXTO, arrowprops={"arrowstyle": "->", "color": CINZA})
+# onde o heap passa a ganhar do vetor: o menor n a partir do qual o heap é sempre mais rápido
+cruzamento = None
+for i in range(len(ns) - 1, -1, -1):
+    if media["dijkstra_v_vezes"][i] >= media["dijkstra_vetor"][i]:
+        break
+    cruzamento = i
+if cruzamento is not None:
+    i = cruzamento
+    plt.annotate(f"a partir de n = {ns[i]}, o heap\nfica mais rápido que o vetor",
+                 (ns[i], media["dijkstra_v_vezes"][i] / media["floyd_warshall"][i]),
+                 xytext=(230, 4.6), fontsize=9, color=TEXTO, arrowprops={"arrowstyle": "->", "color": CINZA})
 eixo_x_log()
-plt.ylim(0, 8.3)
+plt.ylim(0, max(8.3, 1.05 * maior_razao))   # 8,3 nestes dados; cresce se alguma razão passar disso
 plt.gca().yaxis.set_major_formatter(FuncFormatter(virgula))
 plt.ylabel("tempo ÷ tempo do Floyd-Warshall")
 legenda(2)
@@ -169,17 +179,20 @@ salvar("razao")
 plt.figure()
 # deslocamento dos rótulos finais, para os do Floyd-Warshall e do heap não se encostarem
 deslocamentos = {"floyd_warshall": -5, "dijkstra_v_vezes": 2, "dijkstra_vetor": 2}
+maior_passo = 0
 for alg in ALGORITMOS:
     por_passo = [media[alg][i] / ns[i] ** 3 * 1e9 for i in range(len(ns))]
     plt.plot(ns, por_passo, marker=MARCADORES[alg], color=CORES[alg], label=NOMES[alg])
     rotulo(ultimo, por_passo[-1], com_virgula(por_passo[-1], 2), deslocamentos[alg])
+    maior_passo = max(maior_passo, max(por_passo))
 eixo_x_log()
-plt.ylim(0, 5)
+topo = max(5, 1.05 * maior_passo)   # 5 nestes dados; cresce se algum valor passar disso
+plt.ylim(0, topo)
 for tamanho, nome in [(CACHE_L2, "L2"), (CACHE_L3, "L3")]:
     n_cache = math.sqrt(tamanho / 4)
     if n_cache <= ultimo:
         plt.axvline(n_cache, color=CINZA, linestyle="--", linewidth=1)
-        plt.text(n_cache * 1.05, 4.75, "a matriz deixa de\ncaber no " + nome + f" (n ≈ {n_cache:.0f})",
+        plt.text(n_cache * 1.05, 0.95 * topo, "a matriz deixa de\ncaber no " + nome + f" (n ≈ {n_cache:.0f})",
                  va="top", fontsize=9, color=TEXTO)
 plt.gca().yaxis.set_major_formatter(FuncFormatter(virgula))
 plt.ylabel("tempo ÷ n³ (ns)")

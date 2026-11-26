@@ -61,10 +61,11 @@ int main() {
     testaGrafo("caminho", caminho, {0, 2, 5, 9, 2, 0, 3, 7, 5, 3, 0, 4, 9, 7, 4, 0});
     testaGrafo("dois componentes", dois, {0, 5, I, I, 5, 0, I, I, I, I, 0, 7, I, I, 7, 0});
 
-    // Entrada 10: os dois métodos dão a mesma matriz, e a soma das distâncias é 442
+    // Entrada 10: os três métodos e as três cópias com contador dão a mesma matriz,
+    // e a soma das distâncias é 442
     Grafo e10 = lerGrafo("dados/Entrada 10.txt");
     Matriz fw = floydWarshall(e10);
-    confere(fw == dijkstraTodosOsPares(e10), "Entrada 10: Floyd-Warshall e Dijkstra iguais");
+    testaGrafo("Entrada 10", e10, fw);
     long long soma = 0;
     for (int i = 0; i < (int)fw.size(); i++)
         soma += fw[i];

@@ -4,7 +4,6 @@
 #   make testes     roda os testes
 #   make rodar      roda o experimento (os resultados vão para resultados/)
 #   make graficos   gera as figuras em resultados/figuras/
-#   make relatorio  compila o relatório (relatorio/relatorio.pdf)
 #   make clean      apaga os arquivos gerados na compilação
 
 CXX = g++
@@ -31,12 +30,7 @@ rodar: build/experimento
 graficos:
 	python3 scripts/graficos.py
 
-relatorio:
-	cd relatorio && pdflatex -interaction=nonstopmode relatorio.tex && bibtex relatorio \
-		&& pdflatex -interaction=nonstopmode relatorio.tex && pdflatex -interaction=nonstopmode relatorio.tex
-
 clean:
 	rm -rf build
-	rm -f relatorio/*.aux relatorio/*.log relatorio/*.bbl relatorio/*.blg relatorio/*.out
 
-.PHONY: all testes rodar graficos relatorio clean
+.PHONY: all testes rodar graficos clean
