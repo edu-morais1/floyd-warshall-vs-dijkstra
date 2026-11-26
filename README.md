@@ -8,9 +8,8 @@ confere se eles chegam às mesmas distâncias e conta as comparações que cada 
 
 ## Dados de entrada
 
-Os 15 grafos de entrada foram fornecidos pela disciplina e não estão neste
-repositório. Antes de rodar, coloque os arquivos `Entrada 10.txt`, `Entrada 25.txt`,
-..., `Entrada 1500.txt` numa pasta `dados/`, dentro desta pasta. Cada arquivo tem o
+Os 15 grafos de entrada, fornecidos pela disciplina, estão na pasta `dados/`
+(`Entrada 10.txt`, `Entrada 25.txt`, ..., `Entrada 1500.txt`). Cada arquivo tem o
 número de vértices na primeira linha e depois a matriz de pesos (0 = sem aresta).
 
 ## Como compilar e rodar
@@ -68,7 +67,7 @@ Observações:
 | `src/experimento.cpp` | mede os tempos, compara as distâncias e conta as comparações |
 | `src/testes.cpp` | testes dos algoritmos |
 | `scripts/graficos.py` | figuras e `resumo.csv` |
-| `dados/` | os 15 grafos (não incluídos; veja "Dados de entrada") |
+| `dados/` | os 15 grafos de entrada |
 | `resultados/` | CSVs e figuras gerados |
 
 O relatório do trabalho não está neste repositório por enquanto.
