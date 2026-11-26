@@ -2,8 +2,9 @@
 
 Comparação entre o algoritmo de Floyd-Warshall e o algoritmo de Dijkstra executado
 V vezes (caminhos mínimos entre todos os pares de vértices), nos 15 grafos fornecidos
-pelo professor. O programa mede o tempo dos dois métodos, confere se eles chegam às
-mesmas distâncias e conta as comparações que cada um faz.
+pelo professor. O Dijkstra foi implementado com duas filas de prioridade: heap
+binário e vetor (busca linear do mínimo). O programa mede o tempo dos três métodos,
+confere se eles chegam às mesmas distâncias e conta as comparações que cada um faz.
 
 ## Dados de entrada
 
@@ -18,7 +19,7 @@ número de vértices na primeira linha e depois a matriz de pesos (0 = sem arest
 
 ```
 make testes      # compila e roda os testes
-make rodar       # roda o experimento (uns 5 minutos) e grava os CSVs em resultados/
+make rodar       # roda o experimento (uns 8 minutos) e grava os CSVs em resultados/
 make graficos    # gera as figuras em resultados/figuras/
 ```
 
@@ -62,8 +63,8 @@ Observações:
 |---|---|
 | `src/grafo.cpp` | leitura dos arquivos de entrada |
 | `src/floyd_warshall.cpp` | Floyd-Warshall |
-| `src/dijkstra.cpp` | Dijkstra e Dijkstra executado V vezes |
-| `src/contagem.cpp` | cópias dos dois algoritmos que contam as comparações |
+| `src/dijkstra.cpp` | Dijkstra executado V vezes, com heap e com vetor |
+| `src/contagem.cpp` | cópias dos três métodos que contam as comparações |
 | `src/experimento.cpp` | mede os tempos, compara as distâncias e conta as comparações |
 | `src/testes.cpp` | testes dos algoritmos |
 | `scripts/graficos.py` | figuras e `resumo.csv` |
@@ -79,8 +80,8 @@ O relatório do trabalho não está neste repositório por enquanto.
 - Antes de medir, cada método roda uma vez para aquecer a máquina.
 - Cada medida repete o método até completar 0,1 s e divide o tempo pelo número de
   execuções, porque nos grafos pequenos uma execução leva poucos microssegundos.
-- São 10 medidas de cada método em cada grafo, trocando a ordem dos métodos a cada
-  medida.
+- São 10 medidas de cada método em cada grafo, girando a ordem dos três métodos a
+  cada medida.
 - O comando de medição está em `src/experimento.cpp`, na linha marcada com
   `<- a medição`.
 
@@ -92,9 +93,11 @@ marcada com `<- a contagem` em `src/experimento.cpp`). São contadas:
 
 - **relaxamentos:** o teste `d[i][k] + d[k][j] < d[i][j]` no Floyd-Warshall e
   `dist[u] + w < dist[v]` no Dijkstra;
-- **comparações do heap:** as comparações feitas pela fila de prioridade do Dijkstra;
-- **descartes:** o teste que pula a linha sem caminho no Floyd-Warshall e o teste de
-  par antigo a cada remoção da fila no Dijkstra;
+- **comparações da fila:** no Dijkstra com heap, as comparações feitas pela fila de
+  prioridade; no Dijkstra com vetor, as comparações da busca do vértice mais próximo;
+- **descartes:** o teste que pula a linha sem caminho no Floyd-Warshall, o teste de
+  par antigo a cada remoção da fila no Dijkstra com heap e o teste de distância
+  infinita a cada passo no Dijkstra com vetor;
 - **atualizações:** os relaxamentos que diminuíram uma distância.
 
 ## Saídas
@@ -102,9 +105,12 @@ marcada com `<- a contagem` em `src/experimento.cpp`). São contadas:
 | Arquivo | Colunas |
 |---|---|
 | `resultados/tempos.csv` | `n,algoritmo,repeticao,execucoes,tempo_s` (tempo de uma execução) |
-| `resultados/validacao.csv` | `n,arestas,soma_fw,soma_dijkstra,maior_distancia,diferencas` |
-| `resultados/contagens.csv` | `n,arestas,algoritmo,comparacoes,relaxamentos,comparacoes_heap,descartes,atualizacoes` |
+| `resultados/validacao.csv` | `n,arestas,soma_distancias,maior_distancia,diferencas` (`diferencas` conta as entradas em que algum Dijkstra difere do Floyd-Warshall) |
+| `resultados/contagens.csv` | `n,arestas,algoritmo,comparacoes,relaxamentos,comparacoes_fila,descartes,atualizacoes` |
 | `resultados/resumo.csv` | `n,algoritmo,media_s,desvio_s,cv` |
+
+Na coluna `algoritmo`, `floyd_warshall` é o Floyd-Warshall, `dijkstra_v_vezes` é o
+Dijkstra com heap e `dijkstra_vetor` é o Dijkstra com vetor.
 
 Na entrega, o código e o relatório em PDF vão compactados num arquivo só, sem a
 pasta `build/`.

@@ -12,9 +12,10 @@ import matplotlib.pyplot as plt
 
 PASTA = "resultados"
 FIGURAS = os.path.join(PASTA, "figuras")
-ALGORITMOS = ["floyd_warshall", "dijkstra_v_vezes"]
-NOMES = {"floyd_warshall": "Floyd-Warshall", "dijkstra_v_vezes": "Dijkstra × V"}
-MARCADORES = {"floyd_warshall": "o", "dijkstra_v_vezes": "s"}
+ALGORITMOS = ["floyd_warshall", "dijkstra_v_vezes", "dijkstra_vetor"]
+NOMES = {"floyd_warshall": "Floyd-Warshall", "dijkstra_v_vezes": "Dijkstra × V (heap)",
+         "dijkstra_vetor": "Dijkstra × V (vetor)"}
+MARCADORES = {"floyd_warshall": "o", "dijkstra_v_vezes": "s", "dijkstra_vetor": "^"}
 
 
 def salvar(nome):
@@ -25,7 +26,7 @@ def salvar(nome):
 
 
 # tempos[algoritmo][n] = lista com o tempo de cada repetição
-tempos = {"floyd_warshall": {}, "dijkstra_v_vezes": {}}
+tempos = {"floyd_warshall": {}, "dijkstra_v_vezes": {}, "dijkstra_vetor": {}}
 with open(os.path.join(PASTA, "tempos.csv")) as arquivo:
     for linha in csv.DictReader(arquivo):
         n = int(linha["n"])
@@ -70,14 +71,17 @@ for escala in ["linear", "loglog"]:
     plt.legend()
     salvar("tempo_" + escala)
 
-# 3: razão entre os tempos (acima de 1, o Floyd-Warshall é mais rápido)
-razao = [media["dijkstra_v_vezes"][i] / media["floyd_warshall"][i] for i in range(len(ns))]
+# 3: razão entre o tempo de cada Dijkstra e o do Floyd-Warshall
+# (acima de 1, o Floyd-Warshall é mais rápido)
 plt.figure(figsize=(6.4, 4))
-plt.plot(ns, razao, marker="D", color="gray")
+for alg in ["dijkstra_v_vezes", "dijkstra_vetor"]:
+    razao = [media[alg][i] / media["floyd_warshall"][i] for i in range(len(ns))]
+    plt.plot(ns, razao, marker=MARCADORES[alg], label=NOMES[alg], color="C" + str(ALGORITMOS.index(alg)))
 plt.axhline(1, color="black", linewidth=1)
 plt.xscale("log")
 plt.xlabel("vértices (n)")
-plt.ylabel("tempo do Dijkstra × V ÷ tempo do FW")
+plt.ylabel("tempo ÷ tempo do Floyd-Warshall")
+plt.legend()
 salvar("razao")
 
 # 4: tempo dividido por n³ (custo de um passo), com as linhas onde a matriz de
@@ -96,7 +100,7 @@ plt.legend(loc="center right")
 salvar("tempo_por_n3")
 
 # 5: comparações divididas por n³
-comparacoes = {"floyd_warshall": {}, "dijkstra_v_vezes": {}}
+comparacoes = {"floyd_warshall": {}, "dijkstra_v_vezes": {}, "dijkstra_vetor": {}}
 relaxamentos_dijkstra = {}
 with open(os.path.join(PASTA, "contagens.csv")) as arquivo:
     for linha in csv.DictReader(arquivo):
@@ -108,8 +112,8 @@ with open(os.path.join(PASTA, "contagens.csv")) as arquivo:
 plt.figure(figsize=(6.4, 4))
 for alg in ALGORITMOS:
     plt.plot(ns, [comparacoes[alg][n] / n ** 3 for n in ns], marker=MARCADORES[alg], label=NOMES[alg])
-plt.plot(ns, [relaxamentos_dijkstra[n] / n ** 3 for n in ns], marker="^", linestyle=":",
-         label="Dijkstra × V (só relaxamentos)")
+plt.plot(ns, [relaxamentos_dijkstra[n] / n ** 3 for n in ns], marker="x", linestyle=":", color="gray",
+         label="só os relaxamentos (iguais nas duas filas)")
 plt.ylim(bottom=0)
 plt.xscale("log")
 plt.xlabel("vértices (n)")

@@ -1,5 +1,6 @@
-// experimento.cpp - mede o tempo do Floyd-Warshall e do Dijkstra V vezes nos 15
-// grafos, confere se as distâncias são iguais e conta as comparações.
+// experimento.cpp - mede o tempo do Floyd-Warshall e do Dijkstra V vezes (com heap
+// e com vetor) nos 15 grafos, confere se as distâncias são iguais e conta as
+// comparações.
 // Rodar com: make rodar (os resultados vão para a pasta resultados/)
 
 #include <chrono>
@@ -18,14 +19,18 @@ const int GRAFOS = 15;             // número de grafos de entrada
 const int REPETICOES = 10;         // medidas de cada método em cada grafo
 const double TEMPO_MINIMO = 0.1;   // cada medida dura pelo menos 0,1 segundo
 
-const string NOMES[2] = {"floyd_warshall", "dijkstra_v_vezes"};
+const int METODOS = 3;
+const string NOMES[METODOS] = {"floyd_warshall", "dijkstra_v_vezes", "dijkstra_vetor"};
 
-// Executa o método escolhido: 0 = Floyd-Warshall, 1 = Dijkstra V vezes.
+// Executa o método escolhido: 0 = Floyd-Warshall, 1 = Dijkstra V vezes com heap,
+// 2 = Dijkstra V vezes com vetor.
 Matriz executar(int metodo, const Grafo& g) {
     if (metodo == 0)
         return floydWarshall(g);
-    else
+    else if (metodo == 1)
         return dijkstraTodosOsPares(g);
+    else
+        return dijkstraVetorTodosOsPares(g);
 }
 
 // Mede o tempo de uma execução do método. Nos grafos pequenos uma execução leva
@@ -54,10 +59,10 @@ int main() {
         return 1;
     }
     tempos << "n,algoritmo,repeticao,execucoes,tempo_s\n";
-    validacao << "n,arestas,soma_fw,soma_dijkstra,maior_distancia,diferencas\n";
-    contagens << "n,arestas,algoritmo,comparacoes,relaxamentos,comparacoes_heap,descartes,atualizacoes\n";
+    validacao << "n,arestas,soma_distancias,maior_distancia,diferencas\n";
+    contagens << "n,arestas,algoritmo,comparacoes,relaxamentos,comparacoes_fila,descartes,atualizacoes\n";
 
-    cout << "n\tFW (s)\t\tDijkstra (s)\tDij/FW\t\tdistâncias" << endl;
+    cout << "n\tFW (s)\t\theap (s)\tvetor (s)\theap/FW\tvetor/FW\tdistâncias" << endl;
     bool tudoIgual = true;
 
     for (int t = 0; t < GRAFOS; t++) {
@@ -65,16 +70,16 @@ int main() {
         Grafo g = lerGrafo("dados/Entrada " + to_string(n) + ".txt");
 
         // aquecimento: uma execução de cada método antes de medir
-        executar(0, g);
-        executar(1, g);
+        for (int m = 0; m < METODOS; m++)
+            executar(m, g);
 
-        // medição: em cada repetição a ordem dos métodos é trocada, para que uma
-        // variação na velocidade da máquina não prejudique sempre o mesmo método
-        Matriz resultado[2];
-        double soma[2] = {0, 0};
+        // medição: a ordem dos métodos gira a cada repetição (0 1 2, 1 2 0, 2 0 1, ...),
+        // para que uma variação na velocidade da máquina não prejudique sempre o mesmo método
+        Matriz resultado[METODOS];
+        double soma[METODOS] = {0, 0, 0};
         for (int r = 0; r < REPETICOES; r++) {
-            for (int i = 0; i < 2; i++) {
-                int metodo = (r % 2 == 0) ? i : 1 - i;
+            for (int i = 0; i < METODOS; i++) {
+                int metodo = (i + r) % METODOS;
                 int execucoes;
                 double tempo = medir(metodo, g, resultado[metodo], execucoes);
                 tempos << n << "," << NOMES[metodo] << "," << r << "," << execucoes << "," << tempo << "\n";
@@ -82,30 +87,29 @@ int main() {
             }
         }
 
-        // as duas matrizes de distâncias têm de ser iguais, entrada por entrada
-        long long diferencas = 0, somaFw = 0, somaDij = 0;
+        // as três matrizes de distâncias têm de ser iguais, entrada por entrada
+        long long diferencas = 0, soma_distancias = 0;
         int maior = 0;
         for (int i = 0; i < n * n; i++) {
-            if (resultado[0][i] != resultado[1][i])
+            if (resultado[1][i] != resultado[0][i] || resultado[2][i] != resultado[0][i])
                 diferencas++;
-            somaFw += resultado[0][i];
-            somaDij += resultado[1][i];
+            soma_distancias += resultado[0][i];
             if (resultado[0][i] > maior)
                 maior = resultado[0][i];
         }
-        validacao << n << "," << g.arestas << "," << somaFw << "," << somaDij << "," << maior << ","
-                  << diferencas << "\n";
+        validacao << n << "," << g.arestas << "," << soma_distancias << "," << maior << "," << diferencas << "\n";
         if (diferencas > 0)
             tudoIgual = false;
 
         // contagem das comparações, numa execução à parte (fora da medição de tempo)
-        Contagem c[2];
-        floydWarshallContando(g, c[0]);          // <- a contagem
-        dijkstraTodosOsParesContando(g, c[1]);   // <- a contagem
-        for (int m = 0; m < 2; m++) {
-            long long total = c[m].relaxamentos + c[m].comparacoesHeap + c[m].descartes;
+        Contagem c[METODOS];
+        floydWarshallContando(g, c[0]);               // <- a contagem
+        dijkstraTodosOsParesContando(g, c[1]);        // <- a contagem
+        dijkstraVetorTodosOsParesContando(g, c[2]);   // <- a contagem
+        for (int m = 0; m < METODOS; m++) {
+            long long total = c[m].relaxamentos + c[m].comparacoesFila + c[m].descartes;
             contagens << n << "," << g.arestas << "," << NOMES[m] << "," << total << "," << c[m].relaxamentos
-                      << "," << c[m].comparacoesHeap << "," << c[m].descartes << "," << c[m].atualizacoes << "\n";
+                      << "," << c[m].comparacoesFila << "," << c[m].descartes << "," << c[m].atualizacoes << "\n";
         }
 
         // grava agora os resultados deste grafo (se o programa for interrompido, eles ficam salvos)
@@ -114,9 +118,10 @@ int main() {
         contagens.flush();
 
         double mediaFw = soma[0] / REPETICOES;
-        double mediaDij = soma[1] / REPETICOES;
-        cout << n << "\t" << mediaFw << "\t" << mediaDij << "\t" << mediaDij / mediaFw << "\t\t"
-             << (diferencas == 0 ? "iguais" : "DIFERENTES") << endl;
+        double mediaHeap = soma[1] / REPETICOES;
+        double mediaVetor = soma[2] / REPETICOES;
+        cout << n << "\t" << mediaFw << "\t" << mediaHeap << "\t" << mediaVetor << "\t" << mediaHeap / mediaFw
+             << "\t" << mediaVetor / mediaFw << "\t" << (diferencas == 0 ? "iguais" : "DIFERENTES") << endl;
     }
 
     return tudoIgual ? 0 : 1;

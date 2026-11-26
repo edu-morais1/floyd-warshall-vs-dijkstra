@@ -37,13 +37,15 @@ Grafo montarGrafo(int n, vector<vector<int>> arestas) {
     return g;
 }
 
-// Os dois métodos e as duas versões com contador têm de dar a matriz esperada.
+// Os três métodos e as três versões com contador têm de dar a matriz esperada.
 void testaGrafo(string nome, Grafo g, Matriz esperado) {
     Contagem c;
     confere(floydWarshall(g) == esperado, "Floyd-Warshall: " + nome);
-    confere(dijkstraTodosOsPares(g) == esperado, "Dijkstra: " + nome);
+    confere(dijkstraTodosOsPares(g) == esperado, "Dijkstra com heap: " + nome);
+    confere(dijkstraVetorTodosOsPares(g) == esperado, "Dijkstra com vetor: " + nome);
     confere(floydWarshallContando(g, c) == esperado, "Floyd-Warshall com contador: " + nome);
-    confere(dijkstraTodosOsParesContando(g, c) == esperado, "Dijkstra com contador: " + nome);
+    confere(dijkstraTodosOsParesContando(g, c) == esperado, "Dijkstra com heap e contador: " + nome);
+    confere(dijkstraVetorTodosOsParesContando(g, c) == esperado, "Dijkstra com vetor e contador: " + nome);
 }
 
 int main() {
@@ -81,16 +83,26 @@ int main() {
     confere(c.relaxamentos == 18, "Dijkstra no triângulo: V * A = 3 * 6 relaxamentos");
     confere(c.descartes == 3 + c.atualizacoes, "Dijkstra no triângulo: uma remoção para cada inserção");
     dijkstraTodosOsParesContando(caminho, c);
-    confere(c.relaxamentos == 24 && c.comparacoesHeap > 0, "Dijkstra no caminho: 4 * 6 relaxamentos");
+    confere(c.relaxamentos == 24 && c.comparacoesFila > 0, "Dijkstra no caminho: 4 * 6 relaxamentos");
     dijkstraTodosOsParesContando(montarGrafo(2, {{0, 1, 6}}), c);
-    confere(c.comparacoesHeap == 0, "Dijkstra com 2 vértices: a fila nunca tem 2 pares");
+    confere(c.comparacoesFila == 0, "Dijkstra com 2 vértices: a fila nunca tem 2 pares");
     dijkstraTodosOsParesContando(e10, c);
     confere(c.relaxamentos == 560, "Entrada 10: 10 * 56 relaxamentos");
     confere(c.descartes == 10 + c.atualizacoes, "Entrada 10: uma remoção para cada inserção");
     // valores obtidos com a fila de prioridade da biblioteca padrão do g++
-    confere(c.comparacoesHeap == 464 && c.atualizacoes == 127, "Entrada 10: 464 comparações na fila e 127 atualizações");
+    confere(c.comparacoesFila == 464 && c.atualizacoes == 127, "Entrada 10: 464 comparações na fila e 127 atualizações");
 
-    // 3. Grafos sorteados: os quatro resultados têm de ser iguais
+    // Dijkstra com vetor: a cada passo, a busca compara as distâncias dos vértices
+    // abertos (n(n-1)/2 comparações por origem num grafo conexo) e testa se o
+    // vértice escolhido tem distância INF (n testes por origem)
+    dijkstraVetorTodosOsParesContando(tri, c);
+    confere(c.relaxamentos == 18 && c.comparacoesFila == 9 && c.descartes == 9 && c.atualizacoes == 8,
+            "Dijkstra com vetor no triângulo: 18, 9, 9 e 8");
+    dijkstraVetorTodosOsParesContando(e10, c);
+    confere(c.relaxamentos == 560 && c.comparacoesFila == 450 && c.descartes == 100,
+            "Entrada 10 com vetor: 560 relaxamentos, 10 * 45 comparações na busca e 100 testes de INF");
+
+    // 3. Grafos sorteados: os seis resultados têm de ser iguais
     srand(2026);
     for (int t = 0; t < 200; t++) {
         int n = 1 + rand() % 30;

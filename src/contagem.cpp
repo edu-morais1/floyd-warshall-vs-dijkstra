@@ -1,4 +1,4 @@
-// contagem.cpp - cópias do Floyd-Warshall e do Dijkstra com contadores
+// contagem.cpp - cópias do Floyd-Warshall e das duas versões do Dijkstra com contadores
 // As funções que têm o tempo medido não têm contadores, para a contagem não mudar
 // o tempo. Estas cópias fazem as mesmas operações e são executadas à parte.
 
@@ -100,6 +100,59 @@ Matriz dijkstraTodosOsParesContando(const Grafo& g, Contagem& c) {
             d[origem * n + v] = dist[v];
     }
 
-    c.comparacoesHeap = comparacoesNaFila;
+    c.comparacoesFila = comparacoesNaFila;
+    return d;
+}
+
+// Cópia do Dijkstra com vetor. Só as comparações entre distâncias contam: a busca
+// do mínimo compara cada vértice aberto com o melhor encontrado até ali.
+static vector<int> dijkstraVetorContando(const ListaAdj& adj, int origem, Contagem& c) {
+    int n = adj.size();
+    vector<int> dist(n, INF);
+    vector<int> fechado(n, 0);
+    dist[origem] = 0;
+
+    for (int passo = 0; passo < n; passo++) {
+        int u = -1;
+        for (int v = 0; v < n; v++) {
+            if (!fechado[v]) {
+                if (u == -1) {
+                    u = v;
+                } else {
+                    c.comparacoesFila++;
+                    if (dist[v] < dist[u])
+                        u = v;
+                }
+            }
+        }
+        c.descartes++;
+        if (dist[u] == INF)
+            break;
+        fechado[u] = 1;
+
+        int du = dist[u];
+        for (const Aresta& arco : adj[u]) {
+            int v = arco.destino;
+            int nova = du + arco.peso;
+            c.relaxamentos++;
+            if (nova < dist[v]) {
+                dist[v] = nova;
+                c.atualizacoes++;
+            }
+        }
+    }
+    return dist;
+}
+
+Matriz dijkstraVetorTodosOsParesContando(const Grafo& g, Contagem& c) {
+    c = Contagem();
+    int n = g.n;
+    ListaAdj adj = montarListaAdj(g);
+    Matriz d(n * n);
+    for (int origem = 0; origem < n; origem++) {
+        vector<int> dist = dijkstraVetorContando(adj, origem, c);
+        for (int v = 0; v < n; v++)
+            d[origem * n + v] = dist[v];
+    }
     return d;
 }

@@ -17,5 +17,11 @@ struct Aresta {
 typedef vector<vector<Aresta>> ListaAdj;
 
 ListaAdj montarListaAdj(const Grafo& g);
+
+// Dijkstra com a fila de prioridade feita com heap binário
 vector<int> dijkstra(const ListaAdj& adj, int origem);
 Matriz dijkstraTodosOsPares(const Grafo& g);
+
+// Dijkstra com a fila de prioridade feita com vetor (busca linear do mínimo)
+vector<int> dijkstraVetor(const ListaAdj& adj, int origem);
+Matriz dijkstraVetorTodosOsPares(const Grafo& g);
