@@ -22,6 +22,40 @@ make rodar       # roda o experimento (uns 5 minutos) e grava os CSVs em resulta
 make graficos    # gera as figuras em resultados/figuras/
 ```
 
+## No Windows
+
+O código em C++ e o script das figuras funcionam no Windows, mas o Makefile usa
+comandos do Linux. Há três caminhos:
+
+1. **WSL** (o Linux que roda dentro do Windows): os comandos acima funcionam sem
+   mudança.
+2. **MSYS2:** instale o `g++` e o `make` (`pacman -S mingw-w64-ucrt-x86_64-gcc make`)
+   e use os comandos acima no terminal do MSYS2.
+3. **Sem o `make`**, no PowerShell, de dentro desta pasta:
+
+   ```
+   mkdir build, resultados
+   g++ -std=c++17 -O2 -Wall src/testes.cpp src/grafo.cpp src/floyd_warshall.cpp src/dijkstra.cpp src/contagem.cpp -o build/testes.exe
+   .\build\testes.exe
+   g++ -std=c++17 -O2 -Wall src/experimento.cpp src/grafo.cpp src/floyd_warshall.cpp src/dijkstra.cpp src/contagem.cpp -o build/experimento.exe
+   .\build\experimento.exe
+   pip install matplotlib
+   python scripts/graficos.py
+   ```
+
+   A pasta `resultados` precisa existir antes de rodar o experimento; o `mkdir`
+   acima já a cria.
+
+Observações:
+
+- No `cmd` antigo, os acentos do terminal podem sair trocados; use o Windows
+  Terminal ou rode `chcp 65001` antes.
+- Com o compilador do Visual Studio, o teste que confere o número exato de
+  comparações do heap na Entrada 10 pode falhar, porque esse número depende da
+  implementação da fila de prioridade. As distâncias e os relaxamentos não mudam.
+- Para medições mais estáveis, feche os outros programas e use o plano de energia
+  "Alto desempenho".
+
 ## Arquivos
 
 | Arquivo | Conteúdo |
