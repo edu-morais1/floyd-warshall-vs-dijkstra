@@ -6,6 +6,9 @@ pelo professor. O Dijkstra foi implementado com duas filas de prioridade: heap
 binário e vetor (busca linear do mínimo). O programa mede o tempo dos três métodos,
 confere se eles chegam às mesmas distâncias e conta as comparações que cada um faz.
 
+O relatório, com a análise dos resultados, está em
+[`relatorio/relatorio.pdf`](relatorio/relatorio.pdf).
+
 ## Dados de entrada
 
 Os 15 grafos de entrada, fornecidos pela disciplina, estão na pasta `dados/`
@@ -69,8 +72,7 @@ Observações:
 | `scripts/graficos.py` | figuras e `resumo.csv` |
 | `dados/` | os 15 grafos de entrada |
 | `resultados/` | CSVs e figuras gerados |
-
-O relatório do trabalho não está neste repositório por enquanto.
+| `relatorio/relatorio.pdf` | o relatório, no modelo da SBC |
 
 ## Como o tempo é medido
 
