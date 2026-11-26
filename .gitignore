@@ -1,0 +1,9 @@
+build/
+dados/
+__pycache__/
+relatorio/*.aux
+relatorio/*.log
+relatorio/*.bbl
+relatorio/*.blg
+relatorio/*.out
+relatorio/
