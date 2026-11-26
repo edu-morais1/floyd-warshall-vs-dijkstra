@@ -11,6 +11,9 @@ matplotlib.use("Agg")   # só salva os arquivos, sem abrir janela
 import matplotlib.pyplot as plt
 
 PASTA = "resultados"
+# caches do processador onde a rodada foi feita (Ryzen 7 5700X: L2 de 512 KiB por núcleo, L3 de 32 MiB)
+CACHE_L2 = 512 * 1024
+CACHE_L3 = 32 * 1024 * 1024
 FIGURAS = os.path.join(PASTA, "figuras")
 ALGORITMOS = ["floyd_warshall", "dijkstra_v_vezes", "dijkstra_vetor"]
 NOMES = {"floyd_warshall": "Floyd-Warshall", "dijkstra_v_vezes": "Dijkstra × V (heap)",
@@ -85,14 +88,16 @@ plt.legend()
 salvar("razao")
 
 # 4: tempo dividido por n³ (custo de um passo), com as linhas onde a matriz de
-# distâncias (4n² bytes) deixa de caber no cache L2 (256 KiB) e no L3 (6 MiB)
+# distâncias (4n² bytes) deixa de caber nos caches L2 e L3, se isso acontecer nos tamanhos medidos
 plt.figure(figsize=(6.4, 4))
 for alg in ALGORITMOS:
     por_passo = [media[alg][i] / ns[i] ** 3 * 1e9 for i in range(len(ns))]
     plt.plot(ns, por_passo, marker=MARCADORES[alg], label=NOMES[alg])
-for n_cache, texto in [(256, "matriz > L2"), (1254, "matriz > L3")]:
-    plt.axvline(n_cache, color="gray", linestyle="--", linewidth=1)
-    plt.text(n_cache, plt.ylim()[1], " " + texto, va="top", fontsize=8)
+for tamanho, texto in [(CACHE_L2, "matriz > L2"), (CACHE_L3, "matriz > L3")]:
+    n_cache = math.sqrt(tamanho / 4)
+    if n_cache <= ns[-1]:
+        plt.axvline(n_cache, color="gray", linestyle="--", linewidth=1)
+        plt.text(n_cache, plt.ylim()[1], " " + texto, va="top", fontsize=8)
 plt.xscale("log")
 plt.xlabel("vértices (n)")
 plt.ylabel("tempo ÷ n³ (ns)")
